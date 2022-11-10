@@ -21,31 +21,32 @@ class ScheduleJobs(Interceptor):
             every = job['every']
             if every == 'seconds':
                 schedule.every(int(job['period'])).seconds.do(self.http_request, job['url'], job['method'], job['body'],
-                                                              job['user_name'])
+                                                              job['token'])
             elif every == 'minutes':
                 schedule.every(int(job['period'])).minutes.do(self.http_request, job['url'], job['method'], job['body'],
-                                                              job['user_name'])
+                                                              job['token'])
             elif every == 'hours':
                 schedule.every(int(job['period'])).hours.do(self.http_request, job['url'], job['method'], job['body'],
-                                                            job['user_name'])
+                                                            job['token'])
             elif every == 'days':
                 schedule.every(int(job['period'])).days.do(self.http_request, job['url'], job['method'], job['body'],
-                                                           job['user_name'])
+                                                           job['token'])
             elif every == 'weeks':
                 schedule.every(int(job['period'])).weeks.do(self.http_request, job['url'], job['method'], job['body'],
-                                                            job['user_name'])
+                                                            job['token'])
             elif every == 'day':
                 schedule.every().day.at(job['period']).do(self.http_request, job['url'], job['method'], job['body'],
-                                                          job['user_name'])
+                                                          job['token'])
         while True:
             schedule.run_pending()
             time.sleep(1)
         pass
 
-    def http_request(self, url, method="GET", body={}, user_name=None, params={}):
+    def http_request(self, url, method="GET", body={}, token=None, params={}):
         try:
             headers = {
-                "userName": user_name
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
             }
             if method == "GET":
                 print("GET -> " + url)
