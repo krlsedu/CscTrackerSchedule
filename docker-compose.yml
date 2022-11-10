@@ -6,8 +6,8 @@ networks:
 
 services:
   csctracker:
-    container_name: datasource
-    hostname: datasource
+    container_name: csctracker-schedule
+    hostname: csctracker_schedule
     image: krlsedu/csctracker-schedule
     restart: always
     networks:
