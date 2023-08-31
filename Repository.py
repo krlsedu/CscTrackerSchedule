@@ -7,7 +7,6 @@ from Interceptor import Interceptor
 
 class GenericRepository(Interceptor):
     def __init__(self):
-
         try:
             host = os.environ['POSTGRES_HOST']
             password = os.environ['POSTGRES_PASSWORD']
