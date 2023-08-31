@@ -7,11 +7,23 @@ from Interceptor import Interceptor
 
 class GenericRepository(Interceptor):
     def __init__(self):
+
+        try:
+            host = os.environ['POSTGRES_HOST']
+            password = os.environ['POSTGRES_PASSWORD']
+            port = os.environ['POSTGRES_PORT']
+        except:
+            host = "postgres"
+            password = "postgres"
+            port = "5432"
+        user = "postgres"
+        database = "postgres"
         self.conn = psycopg2.connect(
-            host="postgres",
-            database="postgres",
-            user="postgres",
-            password="postgres")
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password)
 
     def execute_select(self, select_):
         cursor = self.conn.cursor()
