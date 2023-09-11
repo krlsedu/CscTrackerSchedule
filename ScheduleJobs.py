@@ -38,8 +38,12 @@ class ScheduleJobs(Interceptor):
                 schedule.every().day.at(job['period']).do(self.http_request, job['url'], job['method'], job['body'],
                                                           job['token'])
         while True:
-            schedule.run_pending()
-            time.sleep(1)
+            try:
+                schedule.run_pending()
+                time.sleep(1)
+            except Exception as e:
+                print(e)
+                pass
         pass
 
     def http_request(self, url, method="GET", body={}, token=None, params={}):
@@ -56,9 +60,11 @@ class ScheduleJobs(Interceptor):
                 response = requests.post(url, json=body, headers=headers)
             else:
                 raise Exception("Method not supported")
-            if response.status_code != 200:
+            if response.status_code < 200 or response.status_code > 299:
                 print(url, response.status_code)
                 print(f'Error sending metrics: {response.text}')
+            else:
+                print(url,"OK")
         except Exception as e:
             print(e)
         pass
