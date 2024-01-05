@@ -6,5 +6,6 @@ starter = Starter()
 schedule_jobs = ScheduleJobs(starter.get_remote_repository(), starter.get_http_repository())
 schedule_jobs.init()
 
+
 if __name__ == '__main__':
     starter.start()
