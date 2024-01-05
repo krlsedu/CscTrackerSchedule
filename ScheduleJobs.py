@@ -1,3 +1,5 @@
+import logging
+
 from csctracker_py_core.repository.http_repository import HttpRepository
 from csctracker_py_core.repository.remote_repository import RemoteRepository
 from csctracker_queue_scheduler.models.enums.time_unit import TimeUnit
@@ -6,6 +8,7 @@ from csctracker_queue_scheduler.services.scheduler_service import SchedulerServi
 
 class ScheduleJobs:
     def __init__(self, remote_repository: RemoteRepository, http_repository: HttpRepository):
+        self.logger = logging.getLogger()
         self.remote_repository = remote_repository
         self.http_repository = http_repository
         pass
@@ -51,18 +54,16 @@ class ScheduleJobs:
                 "Content-Type": "application/json"
             }
             if method == "GET":
-                print("GET -> " + url)
                 response = self.http_repository.get(url, params=params, headers=headers)
             elif method == "POST":
-                print("POST -> " + url)
                 response = self.http_repository.post(url, body=body, headers=headers)
             else:
                 raise Exception("Method not supported")
             if response.status_code < 200 or response.status_code > 299:
-                print(url, response.status_code)
-                print(f'Error sending metrics: {response.text}')
+                self.logger.debug(url, response.status_code)
+                self.logger.error(f'Error sending metrics: {response.text}')
             else:
-                print(url, "OK")
+                self.logger.debug(url, "OK")
         except Exception as e:
-            print(e)
+            self.logger.exception(e)
         pass
