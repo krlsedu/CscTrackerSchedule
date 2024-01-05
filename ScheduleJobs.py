@@ -1,50 +1,48 @@
-import time
-
-import requests
-import schedule
-
-from Interceptor import Interceptor
-from Repository import GenericRepository
-
-generic_repository = GenericRepository()
+from csctracker_py_core.repository.http_repository import HttpRepository
+from csctracker_py_core.repository.remote_repository import RemoteRepository
+from csctracker_queue_scheduler.models.enums.time_unit import TimeUnit
+from csctracker_queue_scheduler.services.scheduler_service import SchedulerService
 
 
-class ScheduleJobs(Interceptor):
-    def __init__(self):
-        super().__init__()
+class ScheduleJobs:
+    def __init__(self, remote_repository: RemoteRepository, http_repository: HttpRepository):
+        self.remote_repository = remote_repository
+        self.http_repository = http_repository
+        pass
 
     def init(self):
-        jobs = generic_repository.get_objects("http_schedule", ["is_active"], {"is_active": "S"})
+        headers = {
+            'authorization': 'Bearer ' + self.http_repository.get_api_token()
+        }
+        jobs = self.remote_repository.get_objects(
+            "http_schedule",
+            data={"is_active": "S"},
+            headers=headers)
+
         for job in jobs:
-            print("Scheduling ->" + job['name'])
-            print(job)
-            every = job['every']
-            if every == 'seconds':
-                schedule.every(int(job['period'])).seconds.do(self.http_request, job['url'], job['method'], job['body'],
-                                                              job['token'])
-            elif every == 'minutes':
-                schedule.every(int(job['period'])).minutes.do(self.http_request, job['url'], job['method'], job['body'],
-                                                              job['token'])
-            elif every == 'hours':
-                schedule.every(int(job['period'])).hours.do(self.http_request, job['url'], job['method'], job['body'],
-                                                            job['token'])
-            elif every == 'days':
-                schedule.every(int(job['period'])).days.do(self.http_request, job['url'], job['method'], job['body'],
-                                                           job['token'])
-            elif every == 'weeks':
-                schedule.every(int(job['period'])).weeks.do(self.http_request, job['url'], job['method'], job['body'],
-                                                            job['token'])
-            elif every == 'day':
-                schedule.every().day.at(job['period']).do(self.http_request, job['url'], job['method'], job['body'],
-                                                          job['token'])
-        while True:
             try:
-                schedule.run_pending()
-                time.sleep(1)
-            except Exception as e:
-                print(e)
-                pass
-        pass
+                period = int(job['period'])
+            except:
+                period = str(job['period'])
+            every_ = job['every']
+            if every_.lower() == 'day':
+                every_ = 'DAILY'
+                time_unit = getattr(TimeUnit, every_.upper())
+                args_ = {
+                    "url": job["url"],
+                    "method": job["method"],
+                    "body": job["body"],
+                    "token": job["token"]
+                }
+            else:
+                time_unit = getattr(TimeUnit, every_.upper())
+                args_ = {
+                    "url": job["url"],
+                    "method": job["method"],
+                    "body": job["body"],
+                    "token": job["token"]
+                }
+            SchedulerService.start_scheduled_job(self.http_request, args=args_, period=period, time_unit=time_unit)
 
     def http_request(self, url, method="GET", body={}, token=None, params={}):
         try:
@@ -54,17 +52,17 @@ class ScheduleJobs(Interceptor):
             }
             if method == "GET":
                 print("GET -> " + url)
-                response = requests.get(url, params=params, headers=headers)
+                response = self.http_repository.get(url, params=params, headers=headers)
             elif method == "POST":
                 print("POST -> " + url)
-                response = requests.post(url, json=body, headers=headers)
+                response = self.http_repository.post(url, body=body, headers=headers)
             else:
                 raise Exception("Method not supported")
             if response.status_code < 200 or response.status_code > 299:
                 print(url, response.status_code)
                 print(f'Error sending metrics: {response.text}')
             else:
-                print(url,"OK")
+                print(url, "OK")
         except Exception as e:
             print(e)
         pass
