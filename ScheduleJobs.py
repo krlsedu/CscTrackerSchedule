@@ -1,5 +1,7 @@
 import logging
+import threading
 import uuid
+from datetime import datetime
 
 from csctracker_py_core.repository.http_repository import HttpRepository
 from csctracker_py_core.repository.remote_repository import RemoteRepository
@@ -37,7 +39,8 @@ class ScheduleJobs:
                     "url": job["url"],
                     "method": job["method"],
                     "body": job["body"],
-                    "token": job["token"]
+                    "token": job["token"],
+                    "job_name": job["name"]
                 }
             else:
                 time_unit = getattr(TimeUnit, every_.upper())
@@ -45,16 +48,26 @@ class ScheduleJobs:
                     "url": job["url"],
                     "method": job["method"],
                     "body": job["body"],
-                    "token": job["token"]
+                    "token": job["token"],
+                    "job_name": job["name"]
                 }
             SchedulerService.start_scheduled_job(self.http_request, args=args_, period=period, time_unit=time_unit)
 
-    def http_request(self, url, method="GET", body={}, token=None, params={}):
+    def http_request(self, url, method="GET", body={}, token=None, params={}, job_name=None):
         try:
+            thread = threading.current_thread()
+            try:
+                id_ = thread.__getattribute__('correlation_id')
+            except Exception:
+                id_ = str(uuid.uuid4())
+            job_name = job_name.replace(" ", "-").lower()
+            now_yyyy_mm_dd_hh_mm_ss_milis = datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
+            id_ = f"{job_name}-scheduled-{now_yyyy_mm_dd_hh_mm_ss_milis}_{id_}"
+            thread.__setattr__('correlation_id', id_)
             headers = {
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json",
-                'x-correlation-id': f"scheduler-{str(uuid.uuid4())}"
+                'x-correlation-id': id_
             }
             if method == "GET":
                 response = self.http_repository.get(url, params=params, headers=headers)
