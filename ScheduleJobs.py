@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from csctracker_py_core.repository.http_repository import HttpRepository
 from csctracker_py_core.repository.remote_repository import RemoteRepository
@@ -15,7 +16,8 @@ class ScheduleJobs:
 
     def init(self):
         headers = {
-            'authorization': 'Bearer ' + self.http_repository.get_api_token()
+            'authorization': 'Bearer ' + self.http_repository.get_api_token(),
+            'x-correlation-id': f"scheduler-{str(uuid.uuid4())}"
         }
         jobs = self.remote_repository.get_objects(
             "http_schedule",
@@ -51,7 +53,8 @@ class ScheduleJobs:
         try:
             headers = {
                 "Authorization": "Bearer " + token,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'x-correlation-id': f"scheduler-{str(uuid.uuid4())}"
             }
             if method == "GET":
                 response = self.http_repository.get(url, params=params, headers=headers)
