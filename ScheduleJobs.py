@@ -5,6 +5,7 @@ from datetime import datetime
 
 from csctracker_py_core.repository.http_repository import HttpRepository
 from csctracker_py_core.repository.remote_repository import RemoteRepository
+from csctracker_py_core.utils.request_info import RequestInfo
 from csctracker_queue_scheduler.models.enums.time_unit import TimeUnit
 from csctracker_queue_scheduler.services.scheduler_service import SchedulerService
 
@@ -56,10 +57,7 @@ class ScheduleJobs:
     def http_request(self, url, method="GET", body={}, token=None, params={}, job_name=None):
         try:
             thread = threading.current_thread()
-            try:
-                id_ = thread.__getattribute__('correlation_id')
-            except Exception:
-                id_ = str(uuid.uuid4())
+            id_ = RequestInfo.get_request_id()
             job_name = job_name.replace(" ", "-").lower()
             now_yyyy_mm_dd_hh_mm_ss_milis = datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
             id_ = f"{job_name}-scheduled-{now_yyyy_mm_dd_hh_mm_ss_milis}_{id_}"
