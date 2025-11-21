@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 import uuid
@@ -39,7 +40,7 @@ class ScheduleJobs:
                 args_ = {
                     "url": job["url"],
                     "method": job["method"],
-                    "body": job["body"],
+                    "body": json.loads(job["body"]),
                     "token": job["token"],
                     "job_name": job["name"]
                 }
@@ -48,13 +49,13 @@ class ScheduleJobs:
                 args_ = {
                     "url": job["url"],
                     "method": job["method"],
-                    "body": job["body"],
+                    "body": json.loads(job["body"]),
                     "token": job["token"],
                     "job_name": job["name"]
                 }
             SchedulerService.start_scheduled_job(self.http_request, args=args_, period=period, time_unit=time_unit)
 
-    def http_request(self, url, method="GET", body={}, token=None, params={}, job_name=None):
+    def http_request(self, url, method="GET", body=None, token=None, params={}, job_name=None):
         try:
             thread = threading.current_thread()
             id_ = RequestInfo.get_request_id()
@@ -67,9 +68,15 @@ class ScheduleJobs:
                 "Content-Type": "application/json",
                 'x-correlation-id': id_
             }
+
             if method == "GET":
                 response = self.http_repository.get(url, params=params, headers=headers)
             elif method == "POST":
+                if body is not None and not isinstance(body, str):
+                    try:
+                        body = json.loads(body)
+                    except:
+                        pass
                 response = self.http_repository.post(url, body=body, headers=headers)
             else:
                 raise Exception("Method not supported")
