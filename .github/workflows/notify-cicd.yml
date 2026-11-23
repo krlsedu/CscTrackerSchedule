@@ -1,0 +1,22 @@
+name: Notify CscTrackerCicd
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "v*"
+
+jobs:
+  notify-cicd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send push webhook to CscTrackerCicd
+        env:
+          CICD_WEBHOOK_URL: ${{ secrets.CICD_WEBHOOK_URL || vars.CICD_WEBHOOK_URL || 'https://cicd.csctracker.com/webhook' }}
+          TOKEN_CSCTRACKER: ${{ secrets.TOKEN_CSCTRACKER }}
+        run: |
+          curl -fsS -X POST "${CICD_WEBHOOK_URL}" \
+            -H "Authorization: Bearer ${TOKEN_CSCTRACKER}" \
+            -H "Content-Type: application/json" \
+            --data-binary "@${GITHUB_EVENT_PATH}"
