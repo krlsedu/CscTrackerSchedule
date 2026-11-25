@@ -1,14 +1,16 @@
-Release Notes - v26.48.001
+Release Notes - v26.48.002
 
-Abaixo estão as notas de atualização para a versão v26.48.001. Esta versão introduz a automação para renovação e gerenciamento de certificados SSL integrados ao Nginx Proxy Manager (NPM), garantindo a continuidade operacional e a segurança das comunicações sem necessidade de intervenção manual. Além disso, foram adicionadas coberturas completas de testes unitários, atualizações nas rotinas de agendamento (cron/scheduler), ajustes na esteira de CI/CD e a manutenção da documentação interna de engenharia e contexto da aplicação.
+Abaixo estão as notas de atualização para a versão v26.48.002. Esta versão introduz um mecanismo automatizado de renovação e sincronização de certificados SSL para o Nginx Proxy Manager (NPM), mitigando riscos de indisponibilidade por expiração de certificados e eliminando intervenções manuais. Além disso, a entrega inclui ampla cobertura de testes unitários, orquestração via agendador de tarefas e atualizações de governança e documentação de engenharia no repositório.
 
 ## 🚀 Features
-* **SSL / NPM:** Implementação do módulo `NpmCertRenewer` integrado ao agendador de tarefas (`ScheduleJobs.py`) e ao ciclo de vida da aplicação (`app.py`), viabilizando a renovação programada e automatizada de certificados digitais do Nginx Proxy Manager. A implementação visa mitigar riscos de expiração de certificados e indisponibilidade de serviços com TLS, contando com suporte via container no `Dockerfile`, dependências atualizadas no `requirements.txt`, suíte abrangente de testes unitários (`tests/test_npm_cert_renewer.py`, `tests/test_schedule_jobs.py`), workflow para notificações de CI/CD e mapeamento técnico nas diretrizes internas de desenvolvimento (`NpmCertRenewer.py`).
+* **Renovação SSL / Nginx Proxy Manager:** Implementação do módulo `NpmCertRenewer` integrado ao agendador de tarefas (`ScheduleJobs.py`) e à aplicação principal (`app.py`), automatizando a verificação e renovação de certificados SSL gerenciados pelo Nginx Proxy Manager (NPM). A motivação técnica foi eliminar a necessidade de manutenção manual e prevenir incidentes decorrentes de certificados expirados em ambiente de produção; a alteração adiciona tratamento de rotinas de agendamento, novas dependências em `requirements.txt`, ajustes no container em `Dockerfile`, pipeline de notificação de CI/CD (`notify-cicd.yml`) e uma suíte completa de testes automatizados para garantir a estabilidade do fluxo de renovação (`NpmCertRenewer.py`).
   * *Commit: `1992144` | Autor: @krlsedu*
 
 ## 🐛 Fixes
 *(Nenhuma alteração desta categoria nesta versão)*
 
 ## 🔧 Chore
-* **Documentação / AI Memory:** Atualização do artefato de handoff de contexto da sessão de desenvolvimento, alinhando o status das entregas, decisões recentes e próximos passos técnicos para manter a continuidade do projeto (`.ai-memory/handoff.md`).
+* **Automação de Build:** Atualização dos metadados de versão e sincronização das notas de release para o acionamento do ciclo de build automatizado da versão 26.48.001 (`version.txt`).
+  * *Commit: `b972e95` | Autor: @krlsedu*
+* **Documentação Interna:** Atualização do artefato de handoff de sessão da equipe (`handoff.md`), garantindo o alinhamento das decisões técnicas e do contexto do projeto para as próximas iterações de desenvolvimento (`.ai-memory/handoff.md`).
   * *Commit: `ee6f4d5` | Autor: @krlsedu*
